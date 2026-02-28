@@ -875,7 +875,7 @@ function showScreen(id) {
 window.showScreen = showScreen;
 
 // ════ TEACHER LOGIN ════
-function teacherLogin() {
+async function teacherLogin() {
   const pwd = document.getElementById('teacher-pwd').value;
   if (pwd === TEACHER_PWD_DEFAULT) {
     document.getElementById('teacher-pwd').value = '';
@@ -885,6 +885,7 @@ function teacherLogin() {
   } else {
     document.getElementById('teacher-err').textContent = 'Password incorreta.';
   }
+
 }
 window.teacherLogin = teacherLogin;
 
