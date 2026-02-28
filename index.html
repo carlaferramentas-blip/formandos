@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FeedbackPrivado</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --cream: #f0f4ff;
+    --gold: #2563eb;
+    --gold-light: #dbeafe;
+    --muted: #6b6b7b;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --green: #2d6a4f;
+    --green-light: #d8f3dc;
+    --red: #9b2226;
+    --red-light: #fde8e8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #ffffff;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; }
+
+  /* ── HOME ── */
+  #home {
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .brand { margin-bottom: 20px; }
+  .brand h1 { font-size: clamp(2.2rem, 6vw, 3.5rem); color: var(--ink); letter-spacing: -1px; }
+  .brand h1 span { color: var(--gold); }
+  .brand p { margin-top: 10px; color: var(--muted); font-size: 1rem; font-weight: 300; }
+
+  .home-cards { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; max-width: 700px; }
+
+  .role-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 260px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .role-card.formador {
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+    border-color: #1e40af;
+    color: #fff;
+  }
+
+  .role-card.formador h2, .role-card.formador p { color: #fff; }
+  .role-card.formador p { opacity: 0.85; }
+  .role-card.formador:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(37,99,235,0.4); }
+
+  .role-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+    transform-origin: left;
+  }
+
+  .role-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
+  .role-card:hover::before { transform: scaleX(1); }
+  .role-card .icon { font-size: 2.4rem; margin-bottom: 16px; }
+  .role-card h2 { font-size: 1.4rem; margin-bottom: 8px; }
+  .role-card p { color: var(--muted); font-size: 0.875rem; line-height: 1.5; }
+
+  /* ── GENERIC ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .top-bar .logo { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.1rem; margin-right: auto; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: #2d2d4a; }
+  .btn-gold { background: var(--gold); color: #fff; }
+  .btn-gold:hover { background: #1d4ed8; }
+  .btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { background: #f8faff; }
+  .btn-danger { background: var(--red-light); color: var(--red); border: 1.5px solid #f5c6c6; }
+  .btn-danger:hover { background: #f9d0d0; }
+
+  /* ── LOGIN ── */
+  .login-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .login-box {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.07);
+  }
+
+  .login-box h2 { font-size: 1.8rem; margin-bottom: 6px; }
+  .login-box p { color: var(--muted); font-size: 0.9rem; margin-bottom: 32px; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-group label { display: block; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 6px; }
+
+  input, textarea, select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: #ffffff;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input:focus, textarea:focus { border-color: var(--gold); }
+  .error-msg { color: var(--red); font-size: 0.85rem; margin-top: 12px; }
+
+  /* ── LOADING OVERLAY ── */
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    backdrop-filter: blur(4px);
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-overlay p {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* ── TEACHER PANEL ── */
+  .teacher-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 65px);
+  }
+
+  .sidebar {
+    border-right: 1px solid var(--border);
+    background: rgba(255,255,255,0.5);
+    padding: 24px 16px;
+    overflow-y: auto;
+  }
+
+  .sidebar-title {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    padding: 0 8px;
+    margin-bottom: 12px;
+  }
+
+  .student-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 4px;
+  }
+
+  .student-item:hover { background: rgba(37,99,235,0.06); }
+  .student-item.active { background: rgba(37,99,235,0.12); }
+
+  .student-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  .student-info { flex: 1; min-width: 0; }
+  .student-name { font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .student-status { font-size: 0.75rem; color: var(--muted); }
+
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+  .dot-green { background: #40b974; }
+  .dot-gray { background: #ccc; }
+
+  .add-student-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: 1.5px dashed var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .add-student-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(37,99,235,0.04); }
+
+  .main-content { padding: 32px; overflow-y: auto; }
+
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--muted);
+    text-align: center;
+    gap: 12px;
+  }
+
+  .empty-state .big-icon { font-size: 3rem; opacity: 0.4; }
+  .empty-state p { font-size: 0.9rem; max-width: 280px; line-height: 1.6; }
+
+  .feedback-editor { max-width: 720px; }
+  .feedback-editor h2 { font-size: 1.6rem; margin-bottom: 4px; }
+  .feedback-editor .subtitle {
+    color: var(--muted);
+    font-size: 0.875rem;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-block {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .card-block h3 { font-size: 1rem; margin-bottom: 16px; font-family: 'DM Sans', sans-serif; font-weight: 600; }
+
+  .password-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f8faff;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-family: monospace;
+    font-size: 1rem;
+    letter-spacing: 2px;
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+    transition: transform 0.15s;
+  }
+
+  .copy-btn:hover { transform: scale(1.2); }
+
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: wrap;
+    padding: 8px;
+    background: #f8faff;
+    border: 1.5px solid var(--border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .tbtn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 9px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    transition: background 0.15s;
+  }
+
+  .tbtn:hover { background: #e2e8f0; }
+  .tsep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+  .rich-editor {
+    width: 100%;
+    min-height: 160px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 0 0 10px 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+    line-height: 1.6;
+  }
+
+  .rich-editor:focus { border-color: #2563eb; }
+  .rich-editor:empty:before { content: attr(data-placeholder); color: #aaa; pointer-events: none; }
+
+  .criterios-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .criterios-table thead tr { background: #f0f4ff; }
+  .criterios-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+  }
+  .criterios-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .criterios-table tfoot td { border-bottom: none; border-top: 2px solid #2563eb; padding-top: 16px; font-size: 1rem; }
+  .criterios-table .crit-input { width: 90px; text-align: center; }
+  .pct { color: var(--muted); font-size: 0.8rem; }
+
+  .save-row { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--ink);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 9999;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── STUDENT VIEW ── */
+  .student-view {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  .feedback-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 860px;
+    width: 100%;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.08);
+  }
+
+  .feedback-card .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .big-avatar {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .feedback-card .header h2 { font-size: 1.4rem; }
+  .feedback-card .header p { color: var(--muted); font-size: 0.875rem; }
+
+  .nota-badge {
+    margin-left: auto;
+    background: var(--ink);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nota-badge .num { font-size: 1.4rem; font-family: 'Playfair Display', serif; line-height: 1; }
+
+  .feedback-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .feedback-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  .no-feedback-msg { text-align: center; padding: 40px; color: var(--muted); }
+
+  /* ── CRITERIOS STUDENT VIEW ── */
+  .criterios-view { margin-top: 24px; }
+  .crit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .crit-row:last-child { border-bottom: none; }
+  .crit-name { color: var(--ink); }
+  .crit-pct { color: var(--muted); font-size: 0.78rem; }
+  .crit-score {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--gold);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 36px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: popIn 0.25s ease;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal h3 { font-size: 1.4rem; margin-bottom: 6px; }
+  .modal p { color: var(--muted); font-size: 0.875rem; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* ── SYNC BADGE ── */
+  .sync-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #f0f4ff;
+    border: 1px solid var(--border);
+  }
+
+  .sync-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #40b974;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── PRINT ── */
+  .print-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #f0f4ff;
+    color: var(--gold);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 28px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .print-btn:hover { background: #dbeafe; border-color: var(--gold); }
+
+  @media print {
+    body * { visibility: hidden; }
+    .print-area, .print-area * { visibility: visible; }
+    .print-area {
+      position: fixed;
+      inset: 0;
+      padding: 32px;
+      background: #fff;
+    }
+    .print-btn { display: none !important; }
+    .top-bar { display: none !important; }
+    .nota-badge { display: flex !important; }
+    .nota-badge {
+      background: #1a1a2e !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .feedback-text {
+      background: #f0f4ff !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .criterios-view .crit-row {
+      border-bottom: 1px solid #e2e8f0 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-footer {
+      display: block !important;
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 0.75rem;
+      color: #6b6b7b;
+      text-align: center;
+    }
+  }
+
+  .print-footer { display: none; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .teacher-layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border); max-height: 220px; }
+    .main-content { padding: 20px 16px; }
+    .login-box { padding: 32px 24px; }
+    .feedback-card { padding: 28px 20px; }
+    .nota-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="spinner"></div>
+  <p id="loading-msg">A carregar dados...</p>
+</div>
+
+<!-- ════ HOME ════ -->
+<div id="home" class="screen">
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; text-align:center;">
+    <div class="brand">
+      <p style="font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; color:#1a1a2e; margin-bottom:0;">Feedback Individualizado: Cenários de Aprendizagem</p>
+    </div>
+    <div class="home-cards">
+      <div class="role-card formador" onclick="showScreen('teacher-login')">
+        <div class="icon">🎓</div>
+        <h2>Sou Formador</h2>
+        <p>Aceder ao painel para gerir formandos e escrever feedback.</p>
+      </div>
+      <div class="role-card formador" onclick="showScreen('student-login')">
+        <div class="icon">📋</div>
+        <h2>Sou Formando</h2>
+        <p>Ver o meu feedback com a password recebida pelo formador.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TEACHER LOGIN ════ -->
+<div id="teacher-login" class="screen">
+  <div class="top-bar">
+    <span class="logo">FeedbackPrivado</span>
+    <button class="btn btn-ghost" onclick="showScreen('home')">← Voltar</button>
+  </div>
+  <div class="login-wrap">
+    <div class="login-box">
+      <h2>Área do Formador</h2>
+      <p>Introduz a tua password de acesso ao painel.</p>
+      <div class="form-group">
+        <label>Password do Formador</label>
+        <input type="password" id="teacher-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter') teacherLogin()">
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="teacherLogin()">Entrar no Painel</button>
+      <p class="error-msg" id="teacher-err"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TEACHER PANEL ════ -->
+<div id="teacher-panel" class="screen">
+  <div class="top-bar">
+    <span class="logo">FeedbackPrivado</span>
+    <span class="sync-badge"><span class="sync-dot"></span> Firestore em tempo real</span>
+    <button class="btn btn-ghost" onclick="showScreen('home')" style="margin-left:auto">Sair</button>
+  </div>
+  <div class="teacher-layout">
+    <div class="sidebar">
+      <div class="sidebar-title">Formandos</div>
+      <div id="student-list"></div>
+      <button class="add-student-btn" onclick="openAddModal()">＋ Adicionar Formando</button>
+    </div>
+    <div class="main-content" id="teacher-main">
+      <div class="empty-state">
+        <div class="big-icon">👈</div>
+        <h3>Seleciona um formando</h3>
+        <p>Escolhe um formando na lista à esquerda para escrever ou editar o feedback.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STUDENT LOGIN ════ -->
+<div id="student-login" class="screen">
+  <div class="top-bar">
+    <span class="logo">FeedbackPrivado</span>
+    <button class="btn btn-ghost" onclick="showScreen('home')">← Voltar</button>
+  </div>
+  <div class="login-wrap">
+    <div class="login-box">
+      <h2>Ver o meu Feedback</h2>
+      <p>Introduz a password individual que recebeste do teu formador.</p>
+      <div class="form-group">
+        <label>A tua Password</label>
+        <input type="password" id="student-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter') studentLogin()">
+      </div>
+      <button class="btn btn-gold" style="width:100%" onclick="studentLogin()">Ver Feedback</button>
+      <p class="error-msg" id="student-err"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STUDENT VIEW ════ -->
+<div id="student-view" class="screen">
+  <div class="top-bar">
+    <span class="logo">FeedbackPrivado</span>
+    <span class="sync-badge"><span class="sync-dot"></span> Dados em tempo real</span>
+    <button class="btn btn-ghost" onclick="showScreen('home')" style="margin-left:auto">Sair</button>
+  </div>
+  <div class="student-view">
+    <div class="feedback-card" id="feedback-card"></div>
+  </div>
+</div>
+
+<!-- ════ ADD STUDENT MODAL ════ -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <h3>Novo Formando</h3>
+    <p>Preenche os dados. A password será gerada automaticamente.</p>
+    <div class="form-group">
+      <label>Nome</label>
+      <input type="text" id="new-name" placeholder="Ex: Ana Ferreira">
+    </div>
+    <div class="form-group">
+      <label>Password personalizada (opcional)</label>
+      <input type="text" id="new-pwd" placeholder="Deixa vazio para gerar automaticamente">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="addStudent()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ TOAST ════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ════ FIREBASE SDK (módulo) ════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ════ CONFIG FIREBASE ════
+const firebaseConfig = {
+  apiKey: "AIzaSyCwEo1iHIpqr5lYK74-7y8cXieQq5fX7As",
+  authDomain: "feedback-formandos.firebaseapp.com",
+  projectId: "feedback-formandos",
+  storageBucket: "feedback-formandos.firebasestorage.app",
+  messagingSenderId: "885812115335",
+  appId: "1:885812115335:web:3d992b8dd30900bdd24522",
+  measurementId: "G-3EM5NDKV5P"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ════ CONSTANTES ════
+const TEACHER_PWD_DEFAULT = 'formacao*2020';
+const WEIGHTS = [0.05, 0.15, 0.20, 0.05, 0.15, 0.20, 0.20];
+const CRIT_NAMES = ['Enquadramento','Objetivos','Produto Final','Tecnologias','Metodologia','Papel do Professor','Reflexão Final'];
+
+// Dados iniciais para migração para o Firestore (só carregado se a coleção estiver vazia)
+const MIGRATED_STUDENTS = [
+  {"id":"1772211219943","name":"Helena Salomé","password":"Solar34","feedback":"<p>Olá, Helena Salomé,</p><p>O cenário apresentado é claro, coerente e cumpre a estrutura solicitada.</p>","nota":"10.00","criterios":[10,10,10,10,10,10,10]},
+  {"id":"1772211302116","name":"Hélia Gamito","password":"Azul85","feedback":"<p>Olá, Hélia Gamito,</p><p>O cenário apresentado é extremamente sensível e demonstra uma excelente capacidade de adaptação tecnológica a contextos de inclusão.</p>","nota":"10.00","criterios":[10,10,10,10,10,10,10]},
+  {"id":"1772211433077","name":"José Delgado","password":"Rio51","feedback":"<p>Olá, José Delgado,</p><p>O cenário apresenta uma proposta clara, coerente e com uma excelente articulação entre as competências linguísticas e a literacia digital.</p>","nota":"10.00","criterios":[10,10,10,10,10,10,10]},
+  {"id":"1772213377597","name":"Cristina Anjos","password":"Verde97","feedback":"<p>Olá, Maria Cristina Nunes,</p><p>O seu cenário é um exemplo de excelência na articulação interdisciplinar e no uso ético da tecnologia.</p>","nota":"10.00","criterios":[10,10,10,10,10,10,10]},
+  {"id":"1772213881470","name":"Carlos Homero","password":"Solar62","feedback":"<p>Olá, Carlos Homero,</p><p>O cenário apresenta uma proposta inovadora e muito bem estruturada para o 12.º ano.</p>","nota":"10.00","criterios":[10,10,10,10,10,10,10]},
+  {"id":"1772214617765","name":"Sofia Ribeiro","password":"Rio34","feedback":"<p>Olá, Sofia Ribeiro,</p><p>O cenário apresentado é claro, coerente e cumpre a estrutura solicitada.</p>","nota":"10.00","criterios":[10,10,10,10,10,10,10]},
+  {"id":"1772219098485","name":"Amália Clara","password":"Luna98","feedback":"<p>Olá Amália Clara,</p><p>O seu cenário está muito bem estruturado e cumpre os requisitos solicitados.</p>","nota":"10.00","criterios":[10,10,10,10,10,10,10]},
+  {"id":"1772223116466","name":"Sílvia Carlos","password":"Azul60","feedback":"","nota":"9.17","criterios":[9.5,10,10,10,10,9,7]},
+  {"id":"1772226211393","name":"Helena Serrão","password":"Solar41","feedback":"","nota":"8.32","criterios":[9.5,10,7,7,8,10,7]}
+];
+
+// ════ FIRESTORE HELPERS ════
+async function getStudents() {
+  const snap = await getDocs(collection(db, 'students'));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+async function saveStudent(student) {
+  await setDoc(doc(db, 'students', student.id), student);
+}
+
+async function removeStudent(id) {
+  await deleteDoc(doc(db, 'students', id));
+}
+
+// Login do formador é verificado localmente (sem Firestore)
+
+// ════ LOADING ════
+function showLoading(msg = 'A carregar...') {
+  document.getElementById('loading-overlay').style.display = 'flex';
+  document.getElementById('loading-msg').textContent = msg;
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').style.display = 'none';
+}
+
+// ════ UTILS ════
+function initials(name) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function genPwd() {
+  const adj = ['Azul','Verde','Solar','Luna','Vento','Mar','Rio','Alto','Bosque','Nuvem'];
+  const num = Math.floor(10 + Math.random() * 90);
+  return adj[Math.floor(Math.random() * adj.length)] + num;
+}
+
+function calcNotaVal(criterios) {
+  if (!criterios || criterios.filter(v => v !== '' && v !== null && v !== undefined).length < 7) return null;
+  return criterios.reduce((acc, v, i) => acc + (parseFloat(v) || 0) * WEIGHTS[i], 0).toFixed(2);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ════ SCREENS ════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+window.showScreen = showScreen;
+
+// ════ TEACHER LOGIN ════
+function teacherLogin() {
+  const pwd = document.getElementById('teacher-pwd').value;
+  if (pwd === TEACHER_PWD_DEFAULT) {
+    document.getElementById('teacher-pwd').value = '';
+    document.getElementById('teacher-err').textContent = '';
+    await renderSidebar();
+    showScreen('teacher-panel');
+  } else {
+    document.getElementById('teacher-err').textContent = 'Password incorreta.';
+  }
+}
+window.teacherLogin = teacherLogin;
+
+// ════ SIDEBAR ════
+let selectedId = null;
+
+async function renderSidebar() {
+  const list = document.getElementById('student-list');
+  const students = await getStudents();
+  list.innerHTML = '';
+
+  if (students.length === 0) {
+    list.innerHTML = '<p style="font-size:0.8rem;color:var(--muted);padding:8px 12px;line-height:1.5">Ainda não tens formandos.<br>Adiciona o primeiro!</p>';
+    return;
+  }
+
+  students.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  students.forEach(s => {
+    const hasFeedback = !!(s.feedback || s.nota);
+    const div = document.createElement('div');
+    div.className = 'student-item' + (s.id === selectedId ? ' active' : '');
+    div.onclick = () => selectStudent(s.id);
+    div.innerHTML = `
+      <div class="student-avatar">${initials(s.name)}</div>
+      <div class="student-info">
+        <div class="student-name">${s.name}</div>
+        <div class="student-status">
+          <span class="dot ${hasFeedback ? 'dot-green' : 'dot-gray'}"></span>
+          ${hasFeedback ? 'Com feedback' : 'Sem feedback'}
+        </div>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+async function selectStudent(id) {
+  selectedId = id;
+  await renderSidebar();
+  const students = await getStudents();
+  const s = students.find(x => x.id === id);
+  if (!s) return;
+
+  const main = document.getElementById('teacher-main');
+  const notaVal = calcNotaVal(s.criterios);
+
+  main.innerHTML = `
+    <div class="feedback-editor">
+      <h2>${s.name}</h2>
+      <div class="subtitle">
+        <span>Password:</span>
+        <span class="password-display">
+          <span id="pwd-show">${s.password}</span>
+          <button class="copy-btn" onclick="copyPwd('${s.password}')" title="Copiar">📋</button>
+        </span>
+      </div>
+
+      <div class="card-block">
+        <h3>📝 Comentários</h3>
+        <div class="toolbar">
+          <button type="button" class="tbtn" onclick="fmt('bold')"><b>B</b></button>
+          <button type="button" class="tbtn" onclick="fmt('italic')"><i>I</i></button>
+          <span class="tsep"></span>
+          <button type="button" class="tbtn" onclick="fmt('insertUnorderedList')">• Lista</button>
+        </div>
+        <div id="fb-text" class="rich-editor" contenteditable="true"
+          data-placeholder="Escreve o teu feedback detalhado aqui…"
+          onkeydown="handleEditorEnter(event)">${s.feedback || ''}</div>
+      </div>
+
+      <div class="card-block">
+        <h3>🥇 Avaliação por Critérios</h3>
+        <table class="criterios-table">
+          <thead><tr><th>CRITÉRIO</th><th>PESO</th><th>CLASSIFICAÇÃO (0–10)</th></tr></thead>
+          <tbody>
+            ${CRIT_NAMES.map((name, i) => `
+              <tr>
+                <td><strong>${name}</strong></td>
+                <td class="pct">${Math.round(WEIGHTS[i]*100)}%</td>
+                <td><input class="nota-input crit-input" type="number" id="crit-${i}" min="0" max="10" step="0.5"
+                  value="${s.criterios?.[i] ?? ''}" oninput="calcNota()"></td>
+              </tr>
+            `).join('')}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2"><strong>Nota Final</strong></td>
+              <td><strong id="nota-final-display" style="font-size:1.3rem;color:#1e40af;font-family:'Playfair Display',serif;">
+                ${notaVal !== null ? notaVal + ' / 10' : '— / 10'}
+              </strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="save-row">
+        <button class="btn btn-primary" onclick="saveFeedback('${id}')">💾 Guardar Feedback</button>
+        <button class="btn btn-ghost" onclick="previewFeedback('${id}')">👁 Pré-visualizar</button>
+        <button class="btn btn-danger" onclick="deleteStudent('${id}')">🗑 Remover</button>
+      </div>
+    </div>
+  `;
+}
+window.selectStudent = selectStudent;
+
+async function saveFeedback(id) {
+  showLoading('A guardar no Firestore...');
+  const students = await getStudents();
+  const s = students.find(x => x.id === id);
+  if (!s) { hideLoading(); return; }
+
+  const fbEl = document.getElementById('fb-text');
+  s.feedback = fbEl ? fbEl.innerHTML : '';
+
+  const crits = WEIGHTS.map((_, i) => {
+    const el = document.getElementById('crit-' + i);
+    return el && el.value !== '' ? parseFloat(el.value) : '';
+  });
+  s.criterios = crits;
+
+  const filled = crits.filter(v => v !== '');
+  s.nota = filled.length === 7
+    ? crits.reduce((acc, v, i) => acc + (parseFloat(v) || 0) * WEIGHTS[i], 0).toFixed(2)
+    : '';
+
+  await saveStudent(s);
+  await renderSidebar();
+  hideLoading();
+  toast('✅ Feedback guardado no Firestore!');
+}
+window.saveFeedback = saveFeedback;
+
+async function previewFeedback(id) {
+  await saveFeedback(id);
+  const students = await getStudents();
+  const s = students.find(x => x.id === id);
+  showFeedbackCard(s);
+  showScreen('student-view');
+}
+window.previewFeedback = previewFeedback;
+
+async function deleteStudent(id) {
+  if (!confirm('Tens a certeza que queres remover este formando?')) return;
+  showLoading('A remover...');
+  await removeStudent(id);
+  selectedId = null;
+  await renderSidebar();
+  document.getElementById('teacher-main').innerHTML = `
+    <div class="empty-state">
+      <div class="big-icon">👈</div>
+      <h3>Seleciona um formando</h3>
+      <p>Escolhe um formando na lista à esquerda.</p>
+    </div>`;
+  hideLoading();
+  toast('🗑 Formando removido.');
+  showScreen('teacher-panel');
+}
+window.deleteStudent = deleteStudent;
+
+function copyPwd(pwd) {
+  navigator.clipboard.writeText(pwd).then(() => toast('📋 Password copiada!'));
+}
+window.copyPwd = copyPwd;
+
+// ════ ADD STUDENT ════
+function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
+function closeAddModal() {
+  document.getElementById('add-modal').classList.remove('open');
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-pwd').value = '';
+}
+window.openAddModal = openAddModal;
+window.closeAddModal = closeAddModal;
+
+async function addStudent() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) { alert('Insere um nome.'); return; }
+  const pwd = document.getElementById('new-pwd').value.trim() || genPwd();
+
+  showLoading('A adicionar formando...');
+  const students = await getStudents();
+
+  if (students.find(s => s.password.toLowerCase() === pwd.toLowerCase())) {
+    hideLoading();
+    alert('Essa password já está em uso. Escolhe outra.');
+    return;
+  }
+
+  const newStudent = {
+    id: Date.now().toString(),
+    name,
+    password: pwd,
+    feedback: '',
+    nota: '',
+    criterios: []
+  };
+
+  await saveStudent(newStudent);
+  closeAddModal();
+  await renderSidebar();
+  hideLoading();
+  toast(`✅ ${name} adicionado/a! Password: ${pwd}`);
+}
+window.addStudent = addStudent;
+
+// ════ STUDENT LOGIN ════
+async function studentLogin() {
+  const pwd = document.getElementById('student-pwd').value.trim();
+  if (!pwd) {
+    document.getElementById('student-err').textContent = 'Introduz a tua password.';
+    return;
+  }
+
+  showLoading('A verificar password...');
+  const students = await getStudents();
+  hideLoading();
+
+  const s = students.find(x => x.password.toLowerCase() === pwd.toLowerCase());
+  if (s) {
+    document.getElementById('student-pwd').value = '';
+    document.getElementById('student-err').textContent = '';
+    showFeedbackCard(s);
+    showScreen('student-view');
+  } else {
+    document.getElementById('student-err').textContent = 'Password inválida. Confirma com o teu formador.';
+  }
+}
+window.studentLogin = studentLogin;
+
+function showFeedbackCard(s) {
+  const hasFeedback = !!(s.feedback || s.nota);
+  const notaVal = calcNotaVal(s.criterios);
+  const card = document.getElementById('feedback-card');
+
+  const criteriosHtml = s.criterios && s.criterios.filter(v => v !== '').length === 7 ? `
+    <div class="criterios-view" style="margin-top:24px;">
+      <div class="feedback-label" style="margin-bottom:12px;">Avaliação por Critérios</div>
+      ${CRIT_NAMES.map((name, i) => `
+        <div class="crit-row">
+          <div>
+            <div class="crit-name">${name}</div>
+            <div class="crit-pct">${Math.round(WEIGHTS[i]*100)}%</div>
+          </div>
+          <div class="crit-score">${s.criterios[i]} / 10</div>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  const today = new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  card.innerHTML = `
+    <div class="print-area">
+      <div class="header">
+        <div class="big-avatar">${initials(s.name)}</div>
+        <div>
+          <h2>${s.name}</h2>
+          <p>Feedback do Formador</p>
+        </div>
+        ${notaVal !== null ? `
+          <div class="nota-badge">
+            <span style="font-size:0.7rem;opacity:0.7">NOTA FINAL</span>
+            <span class="num">${notaVal}/10</span>
+          </div>
+        ` : ''}
+      </div>
+
+      ${hasFeedback ? `
+        ${s.feedback ? `
+          <div class="feedback-label">Comentários</div>
+          <div class="feedback-text">${s.feedback}</div>
+        ` : ''}
+        ${criteriosHtml}
+      ` : `
+        <div class="no-feedback-msg">
+          <div style="font-size:2rem;margin-bottom:12px">⏳</div>
+          <p>O teu feedback ainda não está disponível.<br>Volta mais tarde!</p>
+        </div>
+      `}
+
+      <div class="print-footer">
+        Relatório de Feedback Individualizado · ${s.name} · Gerado em ${today}
+      </div>
+
+      ${hasFeedback ? `
+        <button class="print-btn" onclick="window.print()">
+          🖨️ Imprimir / Guardar como PDF
+        </button>
+      ` : ''}
+    </div>
+  `;
+}
+
+// ════ EDITOR ════
+function fmt(cmd) {
+  document.getElementById('fb-text').focus();
+  document.execCommand(cmd, false, null);
+}
+window.fmt = fmt;
+
+function handleEditorEnter(e) {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  document.execCommand('insertHTML', false, '<br>');
+}
+window.handleEditorEnter = handleEditorEnter;
+
+function calcNota() {
+  const vals = WEIGHTS.map((_, i) => parseFloat(document.getElementById('crit-' + i)?.value) || 0);
+  const total = vals.reduce((acc, v, i) => acc + v * WEIGHTS[i], 0);
+  const el = document.getElementById('nota-final-display');
+  if (el) el.textContent = total.toFixed(2) + ' / 10';
+}
+window.calcNota = calcNota;
+
+// ════ INIT ════
+(async () => {
+  showLoading('A ligar ao Firestore...');
+  try {
